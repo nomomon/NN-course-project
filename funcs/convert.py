@@ -3,10 +3,17 @@ import numpy as np
 shortest_bond_length = 80
 longest_bond_length = 187
 
-type_bond_length =  {'BrC': [191], 'BrN': [188], 'BrO': [180], 'BrS': [218], 'CC': [134, 154], 'CCl': [176], 'CF': [141], 'CH': [114], 'CN': [132, 151], 'CO': [124, 143], 'CS': [162, 181], 'ClN': [173], 'ClO': [165], 'ClS': [203], 'FN': [138], 'FO': [130], 'FS': [168], 'HN': [111], 'HO': [103], 'HS': [141], 'NN': [130, 148], 'NO': [122, 140], 'NS': [160, 178], 'OO': [132], 'OS': [170], 'SS': [208]}
+type_bond_length =  {'BrC': [191], 'BrN': [188], 'BrO': [180], 'BrS': [218], 'CC': [134, 154, 140], 'CCl': [176], 'CF': [141], 'CH': [114], 'CN': [132, 151], 'CO': [124, 143], 'CS': [162, 181], 'ClN': [173], 'ClO': [165], 'ClS': [203], 'FN': [138], 'FO': [130], 'FS': [168], 'HN': [111], 'HO': [103], 'HS': [141], 'NN': [130, 148], 'NO': [122, 140], 'NS': [160, 178], 'OO': [132], 'OS': [170], 'SS': [208]}
 
 def get_bond_type(bond_name, bond_length):
-    return np.argmin([abs(l - bond_length) for l in type_bond_length[bond_name]]) + 1
+    bond_type = np.argmin([abs(l - bond_length) for l in type_bond_length[bond_name]]) + 1
+    
+    # aromatic carbon - carbon bond
+    if 'CC' == bond_name and bond_type == 3:
+        return 1.5
+    else:
+        return bond_type
+
 
 def convert_to_picometers(distance_matrix):
     """
