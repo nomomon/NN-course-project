@@ -6,6 +6,9 @@ from IPython.display import HTML
 from .distance import *
 from .convert import *
 
+def str_int(n):
+    return int(n) if int(n) == n else n
+
 def display_molecule_video(row, angle=10, atom_index=False, bond_type=True, equal_aspect_ratio=False):
     fig = plt.figure()
     fig.set_size_inches(12, 8)
@@ -40,7 +43,7 @@ def display_molecule_video(row, angle=10, atom_index=False, bond_type=True, equa
         bond_matrix = get_bond_type_matrix(dist_mat, row.symbols)
 
         for i in range(len(p)):
-            ax.text(x[i], y[i], z[i], s[i] + (str(i) if atom_index else ""))
+            ax.text(x[i], y[i], z[i], f" {s[i]} {str(i) if atom_index else ''}")
 
         for i in range(len(p)):
             for j in range(i+1, len(p)):
@@ -51,7 +54,7 @@ def display_molecule_video(row, angle=10, atom_index=False, bond_type=True, equa
 
                     ax.plot(lx, ly, lz, color='black')
                     if bond_type:
-                        ax.text(lx.mean(), ly.mean(), lz.mean(), str(int(bond_matrix[i][j])))
+                        ax.text(lx.mean(), ly.mean(), lz.mean(), str_int(bond_matrix[i][j]))
         return fig,
 
 
@@ -98,7 +101,7 @@ def display_molecule(row, atom_index=False, bond_type=True, equal_aspect_ratio=F
     bond_matrix = get_bond_type_matrix(dist_mat, row.symbols)
 
     for i in range(len(p)):
-        ax.text(x[i], y[i], z[i], s[i] + (str(i) if atom_index else ""))
+        ax.text(x[i], y[i], z[i], f" {s[i]} {str(i) if atom_index else ''}")
 
     for i in range(len(p)):
         for j in range(i+1, len(p)):
@@ -109,5 +112,5 @@ def display_molecule(row, atom_index=False, bond_type=True, equal_aspect_ratio=F
 
                 ax.plot(lx, ly, lz, color='black')
                 if bond_type:
-                    ax.text(lx.mean(), ly.mean(), lz.mean(), str(int(bond_matrix[i][j])), color='r')
+                    ax.text(lx.mean(), ly.mean(), lz.mean(), str_int(bond_matrix[i][j]), color='r')
     return fig
