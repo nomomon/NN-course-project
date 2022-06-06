@@ -1,9 +1,23 @@
 import numpy as np
 
+shortest_bond_length = 80
+longest_bond_length = 187
+
+type_bond_length =  {'BrC': [191], 'BrN': [188], 'BrO': [180], 'BrS': [218], 'CC': [134, 154], 'CCl': [176], 'CF': [141], 'CH': [114], 'CN': [132, 151], 'CO': [124, 143], 'CS': [162, 181], 'ClN': [173], 'ClO': [165], 'ClS': [203], 'FN': [138], 'FO': [130], 'FS': [168], 'HN': [111], 'HO': [103], 'HS': [141], 'NN': [130, 148], 'NO': [122, 140], 'NS': [160, 178], 'OO': [132], 'OS': [170], 'SS': [208]}
+
+def get_bond_type(bond_name, bond_length):
+    return np.argmin([abs(l - bond_length) for l in type_bond_length[bond_name]]) + 1
+
+def convert_to_picometers(distance_matrix):
+    """
+    convert from dataset units to picometers
+    """
+    return distance_matrix * 28.4
+
 def get_bond_type_matrix(distance_matrix, symbols):
-    possible_lengths = {'BrBr': [228], 'BrC': [191], 'BrCl': [213], 'BrF': [178], 'BrH': [151], 'BrN': [188], 'BrO': [180], 'BrS': [218], 'CC': [120, 134, 154], 'CCl': [176], 'CF': [141], 'CH': [114], 'CN': [114, 132, 151], 'CO': [124, 143], 'CS': [162, 181], 'ClCl': [198], 'ClF': [163], 'ClH': [136], 'ClN': [173], 'ClO': [165], 'ClS': [203], 'FF': [128], 'FH': [101], 'FN': [138], 'FO': [130], 'FS': [168], 'HH': [74], 'HN': [111], 'HO': [103], 'HS': [141], 'NN': [108, 130, 148], 'NO': [122, 140], 'NS': [160, 178], 'OO': [114, 132], 'OS': [152, 170], 'SS': [190, 208]}
     n_atoms = len(symbols)
 
+    distance_matrix = convert_to_picometers(distance_matrix)
     bond_matrix = np.zeros_like(distance_matrix)
     
     for i in range(n_atoms - 1):
@@ -11,11 +25,12 @@ def get_bond_type_matrix(distance_matrix, symbols):
             bond_name = "".join(sorted(symbols[i] + symbols[j]))
             bond_length = distance_matrix[i][j]
             
-            if(abs(possible_lengths[bond_name][0] - bond_length) > 60 and
-               abs(possible_lengths[bond_name][-1] - bond_length) > 60):
+            if(bond_length < shortest_bond_length or 
+                bond_length > longest_bond_length or
+                bond_name not in type_bond_length):
                 bond_type = 0
             else:
-                bond_type = np.argmin([abs(l - bond_length) for l in possible_lengths[bond_name]]) + 1
+                bond_type = get_bond_type(bond_name, bond_length)
 
             bond_matrix[i][j] = bond_type
             bond_matrix[j][i] = bond_type
@@ -23,11 +38,9 @@ def get_bond_type_matrix(distance_matrix, symbols):
     return bond_matrix
 
 def get_bond_counts(distance_matrix, symbols):
-    possible_lengths = {'BrBr': [228], 'BrC': [191], 'BrCl': [213], 'BrF': [178], 'BrH': [151], 'BrN': [188], 'BrO': [180], 'BrS': [218], 'CC': [120, 134, 154], 'CCl': [176], 'CF': [141], 'CH': [114], 'CN': [114, 132, 151], 'CO': [124, 143], 'CS': [162, 181], 'ClCl': [198], 'ClF': [163], 'ClH': [136], 'ClN': [173], 'ClO': [165], 'ClS': [203], 'FF': [128], 'FH': [101], 'FN': [138], 'FO': [130], 'FS': [168], 'HH': [74], 'HN': [111], 'HO': [103], 'HS': [141], 'NN': [108, 130, 148], 'NO': [122, 140], 'NS': [160, 178], 'OO': [114, 132], 'OS': [152, 170], 'SS': [190, 208]}
     n_atoms = len(symbols)
     
-    distance_matrix *= 28.4
-
+    distance_matrix = convert_to_picometers(distance_matrix)
     bond_counter = {}
     
     for i in range(n_atoms - 1):
@@ -35,11 +48,12 @@ def get_bond_counts(distance_matrix, symbols):
             bond_name = "".join(sorted(symbols[i] + symbols[j]))
             bond_length = distance_matrix[i][j]
             
-            if(abs(possible_lengths[bond_name][0] - bond_length) > 60 and 
-               abs(possible_lengths[bond_name][-1] - bond_length) > 60):
+            if(bond_length < shortest_bond_length or 
+                bond_length > longest_bond_length or
+                bond_name not in type_bond_length):
                 continue
             else:
-                bond_type = np.argmin([abs(l - bond_length) for l in possible_lengths[bond_name]]) + 1
+                bond_type = get_bond_type(bond_name, bond_length)
                 bond_name += str(bond_type)
                 
                 if bond_name in bond_counter:
