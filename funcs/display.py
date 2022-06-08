@@ -39,7 +39,7 @@ def display_molecule_video(row, angle=10, atom_index=False, bond_type=True, equa
             cmap = 'inferno'
         )
 
-        dist_mat, _ = get_distance_matrix(row)
+        dist_mat = get_distance_matrix(row)
         bond_matrix = get_bond_type_matrix(dist_mat, row.symbols)
 
         for i in range(len(p)):
@@ -97,7 +97,7 @@ def display_molecule(row, atom_index=False, bond_type=True, equal_aspect_ratio=F
         cmap = 'inferno'
     )
 
-    dist_mat, _ = get_distance_matrix(row)
+    dist_mat = get_distance_matrix(row)
     bond_matrix = get_bond_type_matrix(dist_mat, row.symbols)
 
     for i in range(len(p)):

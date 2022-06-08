@@ -15,14 +15,14 @@ def get_distance_matrix(row):
             if i == j:
                 continue
             res_matrix[i,j] = get_dist(row.positions[i], row.positions[j])
-    return res_matrix, row.symbols
-# print(get_distance_matrix(row))
+    return res_matrix
 
 def get_all_distances(data):
     res = []
     atoms_matrix = []
     for row in data:
-        dist, atoms = get_distance_matrix(row)
+        atoms = row.symbols
+        dist = get_distance_matrix(row)
         res.append(dist)
         atoms_matrix.append(atoms)
     return res, atoms_matrix
