@@ -12,19 +12,33 @@ print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('
 print("Num CPUs Available: ", len(tf.config.experimental.list_physical_devices('CPU')))
 
 #get the data
-u = pd.read_csv('./data/processed/bond_types.csv')
-y = pd.read_csv('./data/processed/energy.csv')
+u = pd.read_csv('./data/processed/bond_types.csv').to_numpy()
+y = pd.read_csv('./data/processed/energy.csv').to_numpy()
 #split into training and testing
-u_train, u_validate, y_train, y_validate = train_test_split(u, y, test_size=.2, shuffle=True, random_state=42)
+u_train, _, y_train, _ = train_test_split(u, y, test_size=.2, shuffle=True, random_state=42)
 
 #make the model
 model = tf.keras.Sequential()
 model.add(tf.keras.layers.Dense(8, activation = 'relu'))
 model.add(tf.keras.layers.Dense(1))
 
-model.compile(optimizer="SGD", loss="mse", metrics="mae")
+model.compile(optimizer="Adam", loss="mse", metrics="mae")
+
+#save training logs
+callback = tf.keras.callbacks.CSVLogger('training_logs_Adam.csv')
+
+#save best model
+best_model_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath = 'best_model_Adam',
+    monitor='val_loss',
+    save_best_only=True,
+    save_weights_only=False,
+    mode='min'
+)
+
+no_epochs = 100
 
 #run and save the model
-model.fit(u_train, y_train, epochs = 2)
-model.save('model')
+model.fit(u_train, y_train, epochs = no_epochs, validation_split=.2, callbacks=[callback])
+model.save('model_Adam')
 
