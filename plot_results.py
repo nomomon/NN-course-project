@@ -18,11 +18,11 @@ y = pd.read_csv('./data/processed/energy.csv').to_numpy()
 #split into training and testing
 _, u_validate, _, y_validate = train_test_split(u, y, test_size=.2, shuffle=True, random_state=42)
 
-model = tf.keras.models.load_model('model_SGD')
+model = tf.keras.models.load_model('model_Adam_16')
 
 print(model.evaluate(u_validate, y_validate))
 
-df = pd.read_csv('training_logs_SGD.csv')
+df = pd.read_csv('training_logs_Adam_16.csv')
 df.plot(
     x = 'epoch',
     y = ['loss', 'val_loss']

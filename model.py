@@ -19,26 +19,26 @@ u_train, _, y_train, _ = train_test_split(u, y, test_size=.2, shuffle=True, rand
 
 #make the model
 model = tf.keras.Sequential()
-model.add(tf.keras.layers.Dense(8, activation = 'relu'))
+model.add(tf.keras.layers.Dense(16, activation = 'relu'))
 model.add(tf.keras.layers.Dense(1))
 
 model.compile(optimizer="Adam", loss="mse", metrics="mae")
 
 #save training logs
-callback = tf.keras.callbacks.CSVLogger('training_logs_Adam.csv')
+callback = tf.keras.callbacks.CSVLogger('training_logs_Adam_16.csv')
 
 #save best model
 best_model_callback = tf.keras.callbacks.ModelCheckpoint(
-    filepath = 'best_model_Adam',
+    filepath = 'best_model_Adam_16',
     monitor='val_loss',
     save_best_only=True,
     save_weights_only=False,
     mode='min'
 )
 
-no_epochs = 100
+no_epochs = 300
 
 #run and save the model
 model.fit(u_train, y_train, epochs = no_epochs, validation_split=.2, callbacks=[callback])
-model.save('model_Adam')
+model.save('model_Adam_16')
 
