@@ -1,0 +1,120 @@
+\begin{comment}
+Some detail needs to be added about removing the n.a. values of $D_{dist}$ and how this matrix is used to create the input/output pairs $u_{i}$ (atom counts in molecule) and $y_{i}$ p energy levels.
+
+We now have a set of labeled training data that is the sample $S = (u_{i}, y_{i})_{i=1 ... M}$. for which the input $u_{i} \in \mathbb{R}^{26}$, the output $y_{i} \in \mathbb{R}^1$ and the number of molecules $M = 138359$. Of these 138359 data points, we want 80\% to serve as the training set $T = (u_{i}, y_{i})_{i=1 ... N^{t}}$ with $N^{t} = 110687$ and 20\% as a validation set $V = (u_{i}, y_{i}')_{i=1} ... N'$ with $N^{v} = 27672$.
+\end{comment}
+
+In order to provide an adequate description of the structure underlying the learning algorithm, it is crucial to give a formal specification of the learning task we are faced with.
+
+\textbf{Given:} a training set $S_{\text{train}} = (\textbf{u}_i, \textbf{y}_i)_{i=1, \dots, N}$ with $N = 88549$ data points and $\textbf{u}_i \in \mathbb{N}_0^{26}$, $\textbf{y}_i \in \mathbb{R}^1$, 
+a validation set $S_{\text{val}} = (\textbf{u}^{\prime}_i, \textbf{y}^{\prime}_i)_{i=1, \dots, N}$ with $N = 22138$ data points and $\textbf{u}^{\prime}_i \in \mathbb{N}_0^{26}$, $\textbf{y}^{\prime}_i \in \mathbb{R}^1$
+and a test set $S_{\text{test}} = (\textbf{u}^{\text{test}}_i, \textbf{y}^{\text{test}}_i)_{i=1, \dots, N}$ with $N = 27672$ data points and $\textbf{u}^{\text{test}}_i \in \mathbb{N}_0^{26}$, $\textbf{y}^{\text{test}}_i \in \mathbb{R}^1$.
+
+\textbf{Also given:} a learning algorithm $\mathcal{A}$ and a loss function $\mathcal{L}_\mathcal{A}$ from which the empirical risk is calculated, given by:
+\begin{equation}
+    R^{emp}_{\mathcal{A}}(h) = \frac{1}{N} \sum^{N}_{i=1} \mathcal{L}_\mathcal{A} (h(\textbf{u}_i), \textbf{y}_i)
+\end{equation}
+
+\textbf{Wanted:} a model $\hat{f}$ whose risk
+\begin{equation}
+    R(\hat{f}) = E[L(\hat{f}(U), Y)]
+    \label{eqn:risk}
+\end{equation}
+is small.
+
+
+This learning task is a supervised learning regression task. In our case we use a sample $S = (\textbf{u}_i, \textbf{y}_i)_{i=1 ... N}$ in which the input vector $\textbf{u}_i \in \mathbb{N}_0^{26}$ represents the counts of each covalent bond type in a molecule. This vector is paired with output $\textbf{y}_i \in \mathbb{R}^{1}$ which is the total potential energy in a molecule. The sample contains $N  = 138365$ data points, each representing a molecule. 
+
+We assume there exists a function $f : \mathbb{N}_0^{26} \rightarrow \mathbb{R}^{1}$ from which $(\textbf{u}_i, \textbf{y}_i)$ are randomly drawn values with a noise factor $v$ so that: $\textbf{y}_i = f(\textbf{u}_i) + v$. While $f$ is unknown, we use $S$ in order to train an estimated model $\hat{f} : \mathbb{N}_0^{26} \rightarrow \mathbb{R}^{1}$. We evaluate the quality of $\hat{f}$ by means of a loss function $L$.
+
+This function gives us the mismatch between the model's output and desired output. We want to find $\hat{f}$ such that the the risk $R$ of $\hat{f}$, which can be described as expected loss, is minimized. In the formula \ref{eqn:risk}, risk is evaluated with respect to the true joint distributions $U$ and $Y$ from which our input/output samples are drawn. However, we do not know these true distributions. Instead, we minimize the loss averaged over our training sample set $S_{\text{train}}$.
+
+We want to find a learning algorithm $\mathcal{A}$ that, given as input the training sample set $S$, searches a hypothesis space $\mathcal{H}$ for a model $h$ for which the empirical risk is minimal:
+\begin{equation}
+    \mathcal{A}(S) = \underset{h \in \mathcal{H}}{\text{argmin}} \frac{1}{N} \sum^{N}_{i=1} L(h(\textbf{u}_i), \textbf{y}_i).
+\end{equation}
+
+\subsubsection{Multi-Layer Perceptron}
+
+As our architecture, we used a feed-forward multi-layer perceptron (MLP) with one hidden layer. The input vector has a shape of $\mathbb{N}_0^{26}$ and the output vector has the shape $\mathbb{R}^1$, hence the input and output layers have shapes that correspond to this.
+
+The MLP is trained to produce outputs $\textbf{y}_i \in \mathbb{R}^1$ upon inputs $\textbf{u}_i \in \mathbb{N}_0^{26}$ in a way that this input-output mapping is similar to the relationships $\textbf{u}_i \rightarrow \textbf{y}_i$ found in the training data $S_{\text{train}}$. Hence, it can be viewed as a function $\mathcal{N}$, such that
+\begin{equation}
+    \mathcal{N}_\theta : \mathbb{N}_0^{26} \rightarrow \mathbb{R}^1,
+\end{equation}
+where $\theta$ are all the trainable parameters of $\mathcal{N}$.
+
+This function $\mathcal{N}(\textbf{u})$ is computed as:
+\begin{equation}
+    \textbf{x}^1 = relu(\textbf{W}^1 \textbf{u})
+\end{equation}
+\begin{equation}
+    \textbf{y} = \textbf{W}^2 \textbf{x}^1 = \mathcal{N}(\textbf{u}),
+\end{equation}
+where $\textbf{x}^1$ is the activation vector of the hidden layer, $\textbf{y}$ is the activation vector of the output layer and $\textbf{W}^1$ and $\textbf{W}^2$ are the connection weight matrices from the input layer to the hidden layer and from the hidden layer to the output layer respectively. The activation function $relu$ is the rectified linear unit, which is computed as
+\begin{equation}
+    relu(x) = \max(0, x),
+\end{equation}
+introduces non-linearity in the function.
+
+To measure the similarity of $\mathcal{N}(\textbf{u})$ and $\textbf{y}$, we introduce the loss function
+\begin{equation}
+    L : \mathbb{R}^1 \times \mathbb{R}^1 \rightarrow \mathbb{R}^{\ge 0},
+\end{equation}
+that is defined as a quadratic loss function
+\begin{equation}
+    L(\mathcal{N}(\textbf{u}), \textbf{y}) = \parallel \mathcal{N}(\textbf{u}) - \textbf{y} \parallel ^2
+\end{equation}
+because this is a regression task where we need the $\mathcal{N}(\textbf{u})$ represent $\textbf{y}$ as possible.
+
+Our MLP updates its weights with a stochastic gradient descent method by \citeauthor{adam} that is called Adam. Adam is robust and cost efficient optimizer based on adaptive estimates of first-order and second-order moments. It inherits its positive attributes from its previous successors: gradient descent with momentum and root mean square propagation (RMSP). 
+
+The update rule for model's parameters $\textbf{W}$ at time step $t$ is 
+\begin{equation}
+    \textbf{W}_{t+1} = \textbf{W}_{t} - \hat{m_t} (\frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}),
+\end{equation}
+where $\hat{m}_t$ and $\hat{v}_t$ are unbiased decaying average of momentum and velocity respectfully and $\epsilon$ is a positive number close to zero to avoid division by zero.
+
+Momentum ${m}_t$ and velocity ${v}_t$ are computed as follows
+\begin{align}
+    \begin{split}
+        m_t &= \beta_1 m_{t-1} + (1 - \beta_1) (\frac{\delta L}{\delta \theta}) \\
+        v_t &= \beta_2 v_{t-1} + (1 - \beta_2) (\frac{\delta L}{\delta \theta})^2
+    \end{split},
+\end{align}
+
+where $\beta_1$ and $\beta_2$ are the decay hyperparameters and $L$ is the loss. In the first few iterations ${m}_t$ and ${v}_t$ have a bias towards zero, and to counter that the unbiased $\hat{m}_t$ and $\hat{v}_t$ values are used. They are calculated through \begin{align}
+    \begin{split}
+        \hat{m_t} &= \frac{m_t}{(1 - \beta_1^t)} \\
+        \hat{v_t} &= \frac{v_t}{(1 - \beta_2^t)} 
+    \end{split}.
+\end{align}
+
+By default $\beta_1 = 0.9$ and $\beta_2 = 0.999$ and do not need much tuning.
+
+\subsubsection{Hyperparameter tuning}
+
+To find the optimal hyperparametes we are solving a task of 
+
+\begin{equation}
+    \theta_{opt} = \underset{\theta \in \Theta}{\text{argmin}} \frac{1}{N} \sum_{i=1,\dots,N} L(\mathcal{N}_\theta(\textbf{u}_i), \textbf{y}_i),
+\end{equation}
+
+where $\Theta$ is a set of all possible parameters.
+
+Of the all the tunable hyperparameters, we chose the number of neurons in the hidden layer and the learning rate. We used random search to navigate through their search spaces. For the number of neurons we took 32 random uniform points from range $[20, 1000]$ with a step 20, and 32 random uniform points from range $[10^{-3}, 10^{-1}]$ scaled by $log_{10}$.
+
+We trained these 32 models on the validation set $S_{\text{val}}$ and calculated the performance as mean absolute error (MAE) using K-fold cross validation with 10 folds. The results are in Figure \ref{fig:hyperparameter-tuning}.
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/hyperparameter-tuning.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Results of random search for hyperparameter tuning of learning rate and the number of neurons in the hidden layer. Point with the lowest MAE in K-fold is labeled as a star. $X$-axis is in $\log_{10}$ scale. 
+    }
+    \label{fig:hyperparameter-tuning}
+\end{Figure}
+
+From Figure \ref{fig:hyperparameter-tuning} we see that the model with $560$ neurons in the hidden layer and a learning rate $\lambda$ of $0.035$ has the lowest MAE. To get the model with the optimal parameters we trained the network with these hyperparameters for 200 epochs as that's the range where the network seems to converge.
+

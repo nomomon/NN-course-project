@@ -1,0 +1,64 @@
+% The preprocessing can be divided into two parts, first we need to extract from the dataset the properties that will be useful to us, namely the positional coordinates of each atom. From these coordinates we can create a 2D matrix where each row corresponds to the distance between each pair of atoms present in the current molecule. 
+
+% {\color{red} Explain the unit convertion}
+
+For our machine learning task we had to find the number of each type of covalent bond in each molecule. We preprocessed the dataset such that it satisfies this input. First, we had to calculate the distance between every pair of atoms for every molecule in the dataset. After, this we compared these distances to the maximum possible length of each bond between two atoms and got an adjacency matrix, which is later referred to as bond matrix. Then, the bond order problem was framed as a constraint satisfaction problem (CSP) and bond matrices along with the corresponding atom names were passed to a CSP solver, which returned all possible bond orders of each molecule. Finally, the number of each covalent bond was counted in each molecule.
+
+\textbf{Given:} a set $P$ of position matrices, such that $|P| = M$ and $P = \{ P_i \in \mathbb{R}^n \times \mathbb{R}^3 | n \in \mathbb{N} \}$, where $n$ is the number of atoms in each molecule and $M$ is the number of molecules.
+
+\textbf{Also given:} a set $A$ of atom names, such that $|A| = M$ and $A = \{ A_i \in \{\text{C, N, S, O, F, Cl, Br, H}\}^n| n \in \mathbb{N} \}$, where $n$ is the number of atoms that are present in each molecule and $M$ is the total number of molecules.
+
+\textbf{Wanted:} a sample $S = (\textbf{u}_i, \textbf{y}_i)_{i=1, \dots, N}$, where $N$ is the total number of molecules in the original dataset. The input vectors $\textbf{u}_i \in \mathbb{N}_0^B$ are the counts of covalent bonds, where $B$ is the number of different covalent bonds in the dataset and the output vectors $\textbf{y}_i \in \mathbb{R}^1$ are the energies of the corresponding molecules.
+
+\subsubsection{Interatomic distances}
+
+Firstly, we found the interatomic distance matrices for each molecule. To calculate the distance between every atom in a molecule, we looked at all pairs of atoms and calculated their relative distances. This was done by iterating and calculating the euclidean distance between every two atoms in 3 dimensions: 
+\begin{equation}
+    \label{eqn:euclidean-distance}
+    d_{1, 2} = \sqrt{(x_1-x_2)^2 + (y_1-y_2)^2 + (z_1-z_2)^2},
+\end{equation}
+
+where $x_1, y_1, ..., z_2$ are the corresponding coordinates of atoms 1 and 2. We repeated (\ref{eqn:euclidean-distance}) for all atoms in a molecule and arranged the values in a matrix and got the interatomic distance matrix of that molecule. This was repeated for each molecule and we got a set $D$ of interatomic distance matrices, such that $|D| = M$ and $D = \{ D_i \in \mathbb{R}^n\times \mathbb{R}^n | n \in \mathbb{N} \}$, where $n$ is the number of atoms that are present in each molecule and $M$ is the total number of molecules. The pseudocode for this is in the Appendix described in Algorithm \ref{alg:PositionToDistanceMatrix}.
+
+\subsubsection{Bond or not bond}
+
+After computing the distance matrices, we used them to find whether or not there was a bond between two atoms. For each covalent bond, there is a maximum length it can have. We compared the resulting distances to these values and made a set of bond matrices which are the adjacency matrices of each molecule. This was repeated for each molecule and we got a set $B$ of bond matrices, such that $|B| = M$ and $B = \{ B_i \in \{0, 1\}^n\times \{0, 1\}^n | n \in \mathbb{N} \}$, where $n$ is the number of atoms that are present in each molecule and $M$ is the total number of molecules. The pseudocode for this is in the Appendix described in Algorithm \ref{alg:DistanceToBondMatrix}. Figure \ref{fig:molecule-with-bonds-example} is an example of the molecule structure received from the bond matrix.
+
+Not all of the molecules had a correct bond matrix and this problem is addressed in the following subsection.
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/molecule-with-bonds-example.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Example of the molecule from Figure \ref{fig:molecule-example} with covalent bonds. Axis units are in picometers.
+    }
+    \label{fig:molecule-with-bonds-example}
+\end{Figure}
+
+\subsubsection{Bond orders}
+\label{sec:bond-orders}
+
+To find the bond order matrix, we implemented the octet rule in code, with one exception.
+% extending the 'octet rule'
+Most of the atoms follow the octet rule, however some atoms can have more than 8 valence electrons. In our dataset, only sulfur (S) can have a total of 8, 10, or 12 valence electrons.
+
+In mathematical terms, the octet rule is a constraint on a graph with discrete valued edges, meaning that we can rephrase this problem as a constraint satisfaction problem (CSP), where the solution is the bond order matrix. The pseudocode for this is in the Appendix described in Algorithm \ref{alg:CSPSolveBondMatrix}. To account for resonance, final solution is taken as the mean of all the solutions with equal weights. In quantum mechanics, the solutions are weighted by their energies, however we did not account for this and took with equal weights.
+
+Unfortunately, not all the CSP's had a solution, this happened because the lengths of bonds were a little over the maximum bond length and as a result their bond matrix was wrong. The bond matrices were fixed manually and in the end all of the CSP's had a solution.
+
+Finally, we reduced each bond order matrix by counting how many covalent bonds of each type we have. Each row in the resulting matrix is $\textbf{u}_i$ and the energy from the original dataset is $\textbf{y}_i$. Preprocessing resulted in a table like in Figure \ref{fig:preprocessed-data}.
+
+\begin{Figure}
+    \centering
+    \input{sections/example_dataset}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        First five rows of the preprocessed dataset.
+    }
+    \label{fig:preprocessed-data}
+\end{Figure}
+
+\subsubsection{Dataset split}
+
+Lastly, we took 20 percent of the sample $S = (\textbf{u}_i, \textbf{y}_i)_{i=1, \dots, 138365}$ as the test set $|S_{\text{test}}| = 27672$ to measure the performance of the model after training. Furthermore, we split the remaining sample with a $80/20$ train to validation split, which gave us $|S_{\text{train}}| = 88549$ and $|S_{\text{val}}| = 22138$. We used the validation set for hyperparameter tuning.

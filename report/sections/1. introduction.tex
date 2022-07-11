@@ -1,0 +1,50 @@
+% introduction
+In chemistry, properties of molecules, such as their potential energy, are used in predicting the outcomes of chemical reactions, which is important in molecule synthesis research. However, traditional computational methods can take from hours to days to achieve accurate energy level approximations for particularly complex molecules.
+
+% electrons can possess certain discrete energies
+Erwin Schrödinger introduced the Schrödinger equation to unite properties of electrons and energy in a quantum-mechanical system. One implication of the equation is that solutions to the equation exist only for certain values of energy. Therefore, electrons are quantized --- an electron can only possess discrete amounts of energy in an atom, which are called its energy levels.
+
+% covalent bonds
+Molecules are formed when atoms form covalent bonds. Covalent bonds happen when atoms are within the bonding distance (Figure \ref{fig:molecular-potential-energy-curve}) such that electrons can migrate between atoms. The number of electrons shared in the covalent bond is called the bond order. When electrons are shared between two bonded atoms, they change their energy level. Hence, each covalent bond has its own energy associated to it. In other words, to find the energy of the molecule, one can find the number of each type of covalent bond and multiply that by the associated energy.
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/molecular-potential-energy-curve.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+      A curve that shows how the potential energy of a molecule changes as the internuclear separation is increased. Energy between two atoms decreases as they are brought within the bonding distance. However, the energy increases due to the Coulomb repulsive force  between two positively charged nuclei. Bonding distance is a distance at which energy is not zero.
+    }
+    \label{fig:molecular-potential-energy-curve}
+\end{Figure}
+
+% Lewis 'octet rule'
+To simplify the process of figuring out bond orders, Gilbert Newton Lewis came up with the "octet rule", which states that each atom shares electrons with neighbouring atoms to achieve a total of eight valence electrons \cite{inorganicChem}. A molecule that comes out of the octet rule is called the Lewis structure.
+
+% drawback of the 'octet rule', introduction of resonance
+For each molecule, there can be multiple Lewis structures, and by choosing one, data is lost about the molecule. However, it may be restored by introducing resonance, a process in which the structure of a molecule is defined as an average of every possible Lewis structure.
+
+For example ozone, $\text{O}_3$ in Figure \ref{fig:lewis-structure-resonance}. Without resonance, the bond orders would be $2$ and $1$ or $1$ and $2$. However, with resonance bond orders are $1.5$ and $1.5$.
+
+\begin{Figure}
+    \centering
+    \includegraphics[width=.8\linewidth]{images/ozone-lewis-structures.png}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+      Possible Lewis structures for ozone, $\text{O}_3$.
+    }
+    \label{fig:lewis-structure-resonance}
+\end{Figure}
+
+To sum up, if one can analyze the number of covalent bonds in a molecule as well as the corresponding bond orders, and one accounts for resonance, then it is possible to accurately predict the potential energy of said molecule. The neural network approach makes for a relatively computationally efficient solution compared to traditional methods of estimating the molecular energy.
+% project motivation
+
+In this report, we try to predict the energies of molecules, given their conformations, i.e. spatial arrangement of atoms in a molecule, using a multi-layer perceptron.
+
+% The outcome of this task will be of relevance to researchers applying the 
+% Knowing which guide sequences will result in certain 
+
+First, we will discuss the dataset used for this learning task in section 2. After this, we describe all the preprocessing and learning algorithm design steps in section 3. Then, in section 4, we will document the results that our learning algorithm yields. Lastly, in section 5 will analyze said results, reflect on them and discuss directions of potential future research.
+
+
+% In chemistry, it is worth knowing the total potential energy of molecules to better predict the outcome of reactions (phrase this better), this potential energy is stored in the covalent bonds of atoms and is called the \textit{chemical} energy \cite{molecules}. Calculating this potential energy is a long and computationally heavy process due to the quantum physical aspect of the calculation meaning that solving the wave function is required. Although some shortcuts are possible through the Density-Functional Theory (DFT),\cite{molecules} it is not a big enough speedup to make it computationally feasible. To do this, we need to use the many body Schrodinger equation where the dimensions of the problem expands to $3N$ where $N$ is the number of electrons.\\
+% We can get an idea of the scaling required for larger molecules for example glucose ($\text{C_{6}H_{12}O_{6}}$) which results in a total $(6 \cdot 6 + 12\cdot 1 + 6 \cdot 8) \cdot 3 = 96$ dimensions. This gives us incentive to try and approximate these results using neural networks which boils down to a regular regression problem. We wish to obtain a neural network of around 

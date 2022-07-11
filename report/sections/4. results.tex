@@ -1,0 +1,31 @@
+The MLP with one hidden layer with 560 trained on $S_{\text{train}}$ with an Adam optimizer with the learning rate $\lambda = 0.035$ was tested on the $S_{\text{test}}$ set. We ran the model on the test set and obtained the predicted energies of the molecules. As the performance metric for the learning algorithm $\mathcal{A}$ we chose mean absolute error (MAE). It is computed as follows:
+
+\begin{equation}
+    \text{MAE} = \frac{1}{N} \sum_{i=1,\dots, N}
+        \parallel
+            \mathcal{N} (\textbf{u}_i) - \textbf{y}_i
+        \parallel
+\end{equation}
+
+In Figure \ref{fig:AE-distribution} we can see that the absolute error of the model is approximately $\pm 1$ kJ. In Figure \ref{fig:MAE-vs-Total-Atoms}) the relationship between the MAE and size of the molecule can be observed. We noted that for all molecules with more than 30 atoms, the error is approximately 1 kJ. However, molecules smaller than that can achieve errors up to 3.5 kJ.
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/AE-distribution.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Histogram of the model's absolute error on the test set. We excluded 14 molecules from the plots because they had a MAE over 5 and made the plot underrepresented the data.
+
+    }
+    \label{fig:AE-distribution}
+\end{Figure}
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/MAE-vs-Total-Atoms.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Bar chart of how MAE changes with the increase of amount of atoms in the molecule. Number of atoms were rounded to the nearest multiple of 5. Lines on chart indicate the standard error.
+    }
+    \label{fig:MAE-vs-Total-Atoms}
+\end{Figure}

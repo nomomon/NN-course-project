@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[parfill]{parskip}
+\usepackage{url}
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{apacite}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{svg}
+\usepackage[font=footnotesize]{caption} % for images
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+  
+
+
+\usepackage[legalpaper, margin=1in]{geometry}
+
+
+\title{Approximating the energy of molecules from their three-dimensional representations using neural networks}
+\author{
+    Mansur Nurmukhambetov \\ 
+    \texttt{(s4774841)} 
+    \and 
+    Thomas Rey \\
+    \texttt{(s3977315)} 
+    \and 
+    Julius Wagenbach \\ 
+    \texttt{(s3201384)} 
+    \and 
+    Matthijs Jongbloed \\ 
+    \texttt{(s4357833)}
+}
+\date{July 2022}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In this project we tried to predict the potential energy of organic molecules using feed forward neural networks. The traditional methods of computing the energy are computationally expensive and the cost increases with the number of atoms in the molecules. Neural networks are great function approximators that compute comparatively quickly, which makes using them a promising approach. The input data used are the molecule confirmations, position of the atoms in 3D space. By rephrasing the problem as a constraint satisfaction problem, we reduced confirmations to the number of bond pairs. We did hyperparameter tuning to find the right model architecture and parameters. Then, we trained a multilayer perceptron to solve the regression problem of finding the energy of a molecule. Lastly, we reported that the model has a mean absolute error of $\pm 1$ for big molecules and discussed potential improvements.
+\end{abstract}
+
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
+\begin{multicols}{2}
+\section{Introduction}
+\input{sections/1. introduction}
+
+\section{Data}
+\input{sections/2. data}
+
+\section{Methods}
+
+\subsection{Preprocessing}
+\input{sections/3.1 preprocessing}
+
+\subsection{Learning Algorithm}
+\input{sections/3.2 learning}
+
+\section {Results}
+\input{sections/4. results}
+
+\section{Discussion}
+\input{sections/5. discussion}
+
+\section*{Acknowledgements}
+We want to say our thank you to Herbert Jaeger for lecturing the Neural Networks course and providing the materials that helped in writing of this report. We also want to thank Leo Katzenberger for explaining to us the chemistry theory behind and giving ideas on how to approach the project.
+
+\end{multicols}
+
+
+\section*{Appendix}
+\input{sections/example_psuedo_code}
+
+\newpage
+\bibliographystyle{apacite}
+\bibliography{refs}
+
+
+
+
+\end{document}

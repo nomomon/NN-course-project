@@ -1,0 +1,93 @@
+\begin{algorithm}
+\caption{A function to calculate the distance matrix from position matrix.}
+\label{alg:PositionToDistanceMatrix}
+\begin{algorithmic}[1]
+    \Procedure{Dist}{$P_1, P_2$}
+        \State $d \gets Pow(P_1[0] - P_2[0]), 2) + 
+                        Pow(P_1[1] - P_2[1]), 2) + 
+                        Pow(P_1[2] - P_2[2]), 2)$
+        \State \Return $Sqrt(d)$
+    \EndProcedure
+    \\
+    \Procedure{PositionToDistanceMatrix}{$P$}
+        \State $D \gets []$
+        \State $n \gets length(P)$
+        \For {$i=0$ to $n$}
+            \State $D[i] \gets []$
+            \For {$j=0$ to $n$}
+                \State $D[i, j] \gets Dist(P[i], P[j])$
+            \EndFor
+        \EndFor
+        \State \Return $D$
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{A function to calculate the bond matrix from distance matrix and atom names.}
+\label{alg:DistanceToBondMatrix}
+\begin{algorithmic}[1]
+    \Procedure{IsBond}{$atom\_name\_1$, $atom\_name\_2$, $d$}
+        \State $bond\_name \gets atom\_name\_1 + atom\_name\_2$
+        \If {$d < MaximumBondLength(bond\_name)$}
+            \State $bond \gets 1$
+        \Else
+            \State$bond \gets 0$
+        \EndIf
+        \State \Return $bond$
+    \EndProcedure
+    \\
+    \Procedure{DistanceToBondMatrix}{$D$, $A$}
+        \State $B \gets []$
+        \State $n \gets length(D)$
+        \For {$i=0$ to $n$}
+            \State $B[i] \gets []$
+            \For {$j=0$ to $n$}
+                \State $B[i, j] \gets IsBond(A[i], A[j], D[i, j])$
+            \EndFor
+        \EndFor
+        \State \Return $B$
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{A function to find all possible bond order matrices using CSP a solver.}
+\label{alg:CSPSolveBondMatrix}
+\begin{algorithmic}[1]
+
+    % \Procedure{}{}
+
+    \Procedure{CSPSolveBondMatrix}{$B$, $A$}
+        \State $V = []$ \Comment{Array of variables}
+        \State $n \gets length(A)$
+        \For {$i=0$ to n}
+            \For {$j=i$ to n}
+                \If {$B[i, j]$ is not $0$ }
+                    \State $V.insert((i, j))$
+                \EndIf
+            \EndFor
+        \EndFor
+        \\
+        \State $D = \{\}$ \Comment{Dictionary of domains}
+        \For {each $v$ in $V$}
+            \State $bond\_name \gets A[v[0]] + A[v[1]]$
+            \State $D[v] \gets PossibleBondOrders(bond\_name)$
+        \EndFor
+        \\
+        \State $C = []$ \Comment{Array of constraits}
+        \For {$i=0$ to n}
+            \State $total\_deg \gets AtomTotalDegree(A[i])$
+            \Comment{Total degree this atom should have}
+            \State $bonds \gets []$
+            \Comment{Array of bonds from this atom}
+            \For {all $(i, j)$ in $V$}
+                \State $bonds.insert((i, j))$
+            \EndFor
+            \State $C.insert(AtomDegreeConstraint(total\_deg, bonds))$
+        \EndFor
+        \State $S \gets CSPAllSolutions(V, D, C)$
+        \State \Return $S$
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}

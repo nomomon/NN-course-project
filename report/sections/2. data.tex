@@ -1,0 +1,30 @@
+The dataset we are using is from a Kaggle competition "Molecular energy estimation RuCode 5.0" that had a similar goal of predicting energy values from molecule conformations. The dataset is a database with records of position matrices (conformations), atom names and energies of 138365 different molecules.
+
+This dataset is made up of randomly sampled molecules from the MOSES dataset -- a benchmarking platform by \citeauthor{MOSES} to support research on machine learning for drug discovery. The MOSES dataset itself is based on ZINC -- a database of commercially available compounds which contains 4591276 molecules. Molecules in these datasets are encoded as strings of atoms called SMILES (Simplified Molecular Input Line Entry System). All molecules that included charged atoms or atoms besides C, N, S, O, F, Cl, Br, H or cycles longer than 8 atoms were excluded. After cleaning, there were 1936962 molecules left in MOSES.
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/molecule-example.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Example of a plotted conformation with each atom named and color coded. Axis units are not given.
+    }
+    \label{fig:molecule-example}
+\end{Figure}
+
+SMILESs selected form MOSES were converted into a set of molecular conformations using the function \texttt{rdkit.Chem.AllChem.EmbedMultipleConfs()} from the python library RDKit by \citeauthor{RDKIT}. This function decodes a SMILES into a molecule and plots points in 3d space according to chemistry rules. These conformations were clustered and centered at their centroids. Figure \ref{fig:molecule-example} depicts an example of a resulting conformation.
+
+Energies of the molecules, given in kilojoules, were numerically approximated with the density function theory (DFT) function from the psi4 toolkit \cite{psi4}. DFT is a molecular energy approximation tool mainly used in the fields of physics and chemistry because of its phenomenal accuracy to cost ratio. 
+% However, some of the molecules could have taken up to an hour to compute.
+
+Distribution molecule sizes of the resulting dataset seems to be normal around 40 atoms (Figure \ref{fig:distribution-of-data}).
+
+\begin{Figure}
+    \centering
+    \includesvg[width=0.9\linewidth]{images/distribution-of-data.svg}
+    \captionsetup{width=.9\linewidth}
+    \captionof{figure}{
+        Distribution of data with respect to the number of atoms in a molecule.
+    }
+    \label{fig:distribution-of-data}
+\end{Figure}
